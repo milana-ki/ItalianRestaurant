@@ -1,0 +1,153 @@
+﻿@model IEnumerable<ItalianRestaurant.Models.Dish>
+
+<div class="menu-page">
+
+	<aside class="menu-sidebar">
+		<h2>Categories</h2>
+		<nav class="categories-nav">
+			<ul>
+				<li><a href="#antipasti" class="active">Antipasti</a></li>
+				<li><a href="#salads">Salads</a></li>
+				<li><a href="#soups">Soups</a></li>
+				<li><a href="#pasta">Pasta</a></li>
+				<li><a href="#pizza">Pizza</a></li>
+				<li><a href="#side-dishes">Side Dishes</a></li>
+				<li><a href="#desserts">Desserts</a></li>
+				<li><a href="#drinks">Drinks</a></li>
+			</ul>
+		</nav>
+	</aside>
+
+	<main class="menu-content">
+
+		<section id="antipasti">
+			@foreach (var dish in Model.Where(d => d.Category.Name == "Antipasti"))
+			{
+				<div class="dish-card">
+					<div class="dish-info">
+						<h3 class="dish-name">@dish.Name</h3>
+						<span class="dish-price">$@dish.Price</span>
+						<p class="dish-description">@dish.Description</p>
+					</div>
+					<div class="dish-image">
+						<img src="~/images/@dish.ImageUrl" alt="@dish.Name" />
+					</div>
+				</div>
+			}
+		</section>
+
+		<section id="salads">
+			@foreach (var dish in Model.Where(d => d.Category.Name == "Salads"))
+			{
+				<div class="dish-card">
+					<div class="dish-info">
+						<h3 class="dish-name">@dish.Name</h3>
+						<span class="dish-price">$@dish.Price</span>
+						<p class="dish-description">@dish.Description</p>
+					</div>
+					<div class="dish-image">
+						<img src="~/images/@dish.ImageUrl" alt="@dish.Name" />
+					</div>
+				</div>
+			}
+		</section>
+
+		<section id="soups">
+			@foreach (var dish in Model.Where(d => d.Category.Name == "Soups"))
+			{
+				<div class="dish-card">
+					<div class="dish-info">
+						<h3 class="dish-name">@dish.Name</h3>
+						<span class="dish-price">$@dish.Price</span>
+						<p class="dish-description">@dish.Description</p>
+					</div>
+					<div class="dish-image">
+						<img src="~/images/@dish.ImageUrl" alt="@dish.Name" />
+					</div>
+				</div>
+			}
+		</section>
+
+		<section id="pasta">
+			@foreach (var dish in Model.Where(d => d.Category.Name == "Pasta"))
+			{
+				<div class="dish-card">
+					<div class="dish-info">
+						<h3 class="dish-name">@dish.Name</h3>
+						<span class="dish-price">$@dish.Price</span>
+						<p class="dish-description">@dish.Description</p>
+					</div>
+					<div class="dish-image">
+						<img src="~/images/@dish.ImageUrl" alt="@dish.Name" />
+					</div>
+				</div>
+			}
+		</section>
+
+		<section id="pizza">
+			@foreach (var dish in Model.Where(d => d.Category.Name == "Pizza"))
+			{
+				<div class="dish-card">
+					<div class="dish-info">
+						<h3 class="dish-name">@dish.Name</h3>
+						<span class="dish-price">$@dish.Price</span>
+						<p class="dish-description">@dish.Description</p>
+					</div>
+					<div class="dish-image">
+						<img src="~/images/@dish.ImageUrl" alt="@dish.Name" />
+					</div>
+				</div>
+			}
+		</section>
+
+		<section id="side-dishes">
+			@foreach (var dish in Model.Where(d => d.Category.Name == "Side Dishes"))
+			{
+				<div class="dish-card">
+					<div class="dish-info">
+						<h3 class="dish-name">@dish.Name</h3>
+						<span class="dish-price">$@dish.Price</span>
+						<p class="dish-description">@dish.Description</p>
+					</div>
+					<div class="dish-image">
+						<img src="~/images/@dish.ImageUrl" alt="@dish.Name" />
+					</div>
+				</div>
+			}
+		</section>
+
+		<section id="desserts">
+			@foreach (var dish in Model.Where(d => d.Category.Name == "Desserts"))
+			{
+				<div class="dish-card">
+					<div class="dish-info">
+						<h3 class="dish-name">@dish.Name</h3>
+						<span class="dish-price">$@dish.Price</span>
+						<p class="dish-description">@dish.Description</p>
+					</div>
+					<div class="dish-image">
+						<img src="~/images/@dish.ImageUrl" alt="@dish.Name" />
+					</div>
+				</div>
+			}
+		</section>
+
+		<section id="drinks">
+			@foreach (var dish in Model.Where(d => d.Category.Name == "Drinks"))
+			{
+				<div class="dish-card">
+					<div class="dish-info">
+						<h3 class="dish-name">@dish.Name</h3>
+						<span class="dish-price">$@dish.Price</span>
+						<p class="dish-description">@dish.Description</p>
+					</div>
+					<div class="dish-image">
+						<img src="~/images/@dish.ImageUrl" alt="@dish.Name" />
+					</div>
+				</div>
+			}
+		</section>
+
+	</main>
+
+</div>
