@@ -1,153 +1,231 @@
 ﻿@model IEnumerable<ItalianRestaurant.Models.Dish>
 
-<div class="menu-page">
+@{
+    ViewData["Title"] = "Menu";
+}
 
-	<aside class="menu-sidebar">
-		<h2>Categories</h2>
-		<nav class="categories-nav">
-			<ul>
-				<li><a href="#antipasti" class="active">Antipasti</a></li>
-				<li><a href="#salads">Salads</a></li>
-				<li><a href="#soups">Soups</a></li>
-				<li><a href="#pasta">Pasta</a></li>
-				<li><a href="#pizza">Pizza</a></li>
-				<li><a href="#side-dishes">Side Dishes</a></li>
-				<li><a href="#desserts">Desserts</a></li>
-				<li><a href="#drinks">Drinks</a></li>
-			</ul>
-		</nav>
-	</aside>
+<div class="container my-4">
+    <div class="row">
+        
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm border-0 p-3 sticky-top" style="top: 20px;">
+                <h5 class="fw-bold mb-3">Categories</h5>
+                <nav class="nav flex-column nav-pills">
+                    <a class="nav-link text-dark mb-1" href="#antipasti">Antipasti</a>
+                    <a class="nav-link text-dark mb-1" href="#salads">Salads</a>
+                    <a class="nav-link text-dark mb-1" href="#soups">Soups</a>
+                    <a class="nav-link text-dark mb-1" href="#pasta">Pasta</a>
+                    <a class="nav-link text-dark mb-1" href="#pizza">Pizza</a>
+                    <a class="nav-link text-dark mb-1" href="#side-dishes">Side Dishes</a>
+                    <a class="nav-link text-dark mb-1" href="#desserts">Desserts</a>
+                    <a class="nav-link text-dark mb-1" href="#drinks">Drinks</a>
+                </nav>
+            </div>
+        </div>
 
-	<main class="menu-content">
+        <div class="col-md-9">
 
-		<section id="antipasti">
-			@foreach (var dish in Model.Where(d => d.Category.Name == "Antipasti"))
-			{
-				<div class="dish-card">
-					<div class="dish-info">
-						<h3 class="dish-name">@dish.Name</h3>
-						<span class="dish-price">$@dish.Price</span>
-						<p class="dish-description">@dish.Description</p>
-					</div>
-					<div class="dish-image">
-						<img src="~/images/@dish.ImageUrl" alt="@dish.Name" />
-					</div>
-				</div>
-			}
-		</section>
+            <!-- 1. ANTIPASTI -->
+            <section id="antipasti" class="card shadow-sm border-0 p-4 mb-4">
+                <h3 class="fw-bold mb-4 border-bottom pb-2">Antipasti</h3>
+                @{ var antipasti = Model.Where(d => d.Category.Name == "Antipasti").ToList(); }
+                @for (int i = 0; i < antipasti.Count; i++)
+                {
+                    var dish = antipasti[i];
+                    <div class="d-flex justify-content-between align-items-center py-2">
+                        <div class="pe-3">
+                            <h5 class="fw-semibold mb-1">@dish.Name</h5>
+                            <span class="text-danger fw-bold">$@dish.Price</span>
+                            <p class="text-muted small mb-2">@dish.Description</p>
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                                <input type="hidden" name="dishId" value="@dish.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm px-3">Add to Cart</button>
+                            </form>
+                        </div>
+                        <div>
+                            <img src="~/images/@dish.ImageUrl" alt="@dish.Name" class="rounded object-fit-cover shadow-sm" style="width: 90px; height: 90px;" />
+                        </div>
+                    </div>
+                    @if (i < antipasti.Count - 1) { <hr class="text-muted opacity-25 my-3" /> }
+                }
+            </section>
 
-		<section id="salads">
-			@foreach (var dish in Model.Where(d => d.Category.Name == "Salads"))
-			{
-				<div class="dish-card">
-					<div class="dish-info">
-						<h3 class="dish-name">@dish.Name</h3>
-						<span class="dish-price">$@dish.Price</span>
-						<p class="dish-description">@dish.Description</p>
-					</div>
-					<div class="dish-image">
-						<img src="~/images/@dish.ImageUrl" alt="@dish.Name" />
-					</div>
-				</div>
-			}
-		</section>
+            <!-- 2. SALADS -->
+            <section id="salads" class="card shadow-sm border-0 p-4 mb-4">
+                <h3 class="fw-bold mb-4 border-bottom pb-2">Salads</h3>
+                @{ var salads = Model.Where(d => d.Category.Name == "Salads").ToList(); }
+                @for (int i = 0; i < salads.Count; i++)
+                {
+                    var dish = salads[i];
+                    <div class="d-flex justify-content-between align-items-center py-2">
+                        <div class="pe-3">
+                            <h5 class="fw-semibold mb-1">@dish.Name</h5>
+                            <span class="text-danger fw-bold">$@dish.Price</span>
+                            <p class="text-muted small mb-2">@dish.Description</p>
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                                <input type="hidden" name="dishId" value="@dish.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm px-3">Add to Cart</button>
+                            </form>
+                        </div>
+                        <div>
+                            <img src="~/images/@dish.ImageUrl" alt="@dish.Name" class="rounded object-fit-cover shadow-sm" style="width: 90px; height: 90px;" />
+                        </div>
+                    </div>
+                    @if (i < salads.Count - 1) { <hr class="text-muted opacity-25 my-3" /> }
+                }
+            </section>
 
-		<section id="soups">
-			@foreach (var dish in Model.Where(d => d.Category.Name == "Soups"))
-			{
-				<div class="dish-card">
-					<div class="dish-info">
-						<h3 class="dish-name">@dish.Name</h3>
-						<span class="dish-price">$@dish.Price</span>
-						<p class="dish-description">@dish.Description</p>
-					</div>
-					<div class="dish-image">
-						<img src="~/images/@dish.ImageUrl" alt="@dish.Name" />
-					</div>
-				</div>
-			}
-		</section>
+            <!-- 3. SOUPS -->
+            <section id="soups" class="card shadow-sm border-0 p-4 mb-4">
+                <h3 class="fw-bold mb-4 border-bottom pb-2">Soups</h3>
+                @{ var soups = Model.Where(d => d.Category.Name == "Soups").ToList(); }
+                @for (int i = 0; i < soups.Count; i++)
+                {
+                    var dish = soups[i];
+                    <div class="d-flex justify-content-between align-items-center py-2">
+                        <div class="pe-3">
+                            <h5 class="fw-semibold mb-1">@dish.Name</h5>
+                            <span class="text-danger fw-bold">$@dish.Price</span>
+                            <p class="text-muted small mb-2">@dish.Description</p>
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                                <input type="hidden" name="dishId" value="@dish.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm px-3">Add to Cart</button>
+                            </form>
+                        </div>
+                        <div>
+                            <img src="~/images/@dish.ImageUrl" alt="@dish.Name" class="rounded object-fit-cover shadow-sm" style="width: 90px; height: 90px;" />
+                        </div>
+                    </div>
+                    @if (i < soups.Count - 1) { <hr class="text-muted opacity-25 my-3" /> }
+                }
+            </section>
 
-		<section id="pasta">
-			@foreach (var dish in Model.Where(d => d.Category.Name == "Pasta"))
-			{
-				<div class="dish-card">
-					<div class="dish-info">
-						<h3 class="dish-name">@dish.Name</h3>
-						<span class="dish-price">$@dish.Price</span>
-						<p class="dish-description">@dish.Description</p>
-					</div>
-					<div class="dish-image">
-						<img src="~/images/@dish.ImageUrl" alt="@dish.Name" />
-					</div>
-				</div>
-			}
-		</section>
+            <!-- 4. PASTA -->
+            <section id="pasta" class="card shadow-sm border-0 p-4 mb-4">
+                <h3 class="fw-bold mb-4 border-bottom pb-2">Pasta</h3>
+                @{ var pasta = Model.Where(d => d.Category.Name == "Pasta").ToList(); }
+                @for (int i = 0; i < pasta.Count; i++)
+                {
+                    var dish = pasta[i];
+                    <div class="d-flex justify-content-between align-items-center py-2">
+                        <div class="pe-3">
+                            <h5 class="fw-semibold mb-1">@dish.Name</h5>
+                            <span class="text-danger fw-bold">$@dish.Price</span>
+                            <p class="text-muted small mb-2">@dish.Description</p>
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                                <input type="hidden" name="dishId" value="@dish.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm px-3">Add to Cart</button>
+                            </form>
+                        </div>
+                        <div>
+                            <img src="~/images/@dish.ImageUrl" alt="@dish.Name" class="rounded object-fit-cover shadow-sm" style="width: 90px; height: 90px;" />
+                        </div>
+                    </div>
+                    @if (i < pasta.Count - 1) { <hr class="text-muted opacity-25 my-3" /> }
+                }
+            </section>
 
-		<section id="pizza">
-			@foreach (var dish in Model.Where(d => d.Category.Name == "Pizza"))
-			{
-				<div class="dish-card">
-					<div class="dish-info">
-						<h3 class="dish-name">@dish.Name</h3>
-						<span class="dish-price">$@dish.Price</span>
-						<p class="dish-description">@dish.Description</p>
-					</div>
-					<div class="dish-image">
-						<img src="~/images/@dish.ImageUrl" alt="@dish.Name" />
-					</div>
-				</div>
-			}
-		</section>
+            <!-- 5. PIZZA -->
+            <section id="pizza" class="card shadow-sm border-0 p-4 mb-4">
+                <h3 class="fw-bold mb-4 border-bottom pb-2">Pizza</h3>
+                @{ var pizza = Model.Where(d => d.Category.Name == "Pizza").ToList(); }
+                @for (int i = 0; i < pizza.Count; i++)
+                {
+                    var dish = pizza[i];
+                    <div class="d-flex justify-content-between align-items-center py-2">
+                        <div class="pe-3">
+                            <h5 class="fw-semibold mb-1">@dish.Name</h5>
+                            <span class="text-danger fw-bold">$@dish.Price</span>
+                            <p class="text-muted small mb-2">@dish.Description</p>
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                                <input type="hidden" name="dishId" value="@dish.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm px-3">Add to Cart</button>
+                            </form>
+                        </div>
+                        <div>
+                            <img src="~/images/@dish.ImageUrl" alt="@dish.Name" class="rounded object-fit-cover shadow-sm" style="width: 90px; height: 90px;" />
+                        </div>
+                    </div>
+                    @if (i < pizza.Count - 1) { <hr class="text-muted opacity-25 my-3" /> }
+                }
+            </section>
 
-		<section id="side-dishes">
-			@foreach (var dish in Model.Where(d => d.Category.Name == "Side Dishes"))
-			{
-				<div class="dish-card">
-					<div class="dish-info">
-						<h3 class="dish-name">@dish.Name</h3>
-						<span class="dish-price">$@dish.Price</span>
-						<p class="dish-description">@dish.Description</p>
-					</div>
-					<div class="dish-image">
-						<img src="~/images/@dish.ImageUrl" alt="@dish.Name" />
-					</div>
-				</div>
-			}
-		</section>
+            <!-- 6. SIDE DISHES -->
+            <section id="side-dishes" class="card shadow-sm border-0 p-4 mb-4">
+                <h3 class="fw-bold mb-4 border-bottom pb-2">Side Dishes</h3>
+                @{ var sides = Model.Where(d => d.Category.Name == "Side Dishes").ToList(); }
+                @for (int i = 0; i < sides.Count; i++)
+                {
+                    var dish = sides[i];
+                    <div class="d-flex justify-content-between align-items-center py-2">
+                        <div class="pe-3">
+                            <h5 class="fw-semibold mb-1">@dish.Name</h5>
+                            <span class="text-danger fw-bold">$@dish.Price</span>
+                            <p class="text-muted small mb-2">@dish.Description</p>
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                                <input type="hidden" name="dishId" value="@dish.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm px-3">Add to Cart</button>
+                            </form>
+                        </div>
+                        <div>
+                            <img src="~/images/@dish.ImageUrl" alt="@dish.Name" class="rounded object-fit-cover shadow-sm" style="width: 90px; height: 90px;" />
+                        </div>
+                    </div>
+                    @if (i < sides.Count - 1) { <hr class="text-muted opacity-25 my-3" /> }
+                }
+            </section>
 
-		<section id="desserts">
-			@foreach (var dish in Model.Where(d => d.Category.Name == "Desserts"))
-			{
-				<div class="dish-card">
-					<div class="dish-info">
-						<h3 class="dish-name">@dish.Name</h3>
-						<span class="dish-price">$@dish.Price</span>
-						<p class="dish-description">@dish.Description</p>
-					</div>
-					<div class="dish-image">
-						<img src="~/images/@dish.ImageUrl" alt="@dish.Name" />
-					</div>
-				</div>
-			}
-		</section>
+            <!-- 7. DESSERTS -->
+            <section id="desserts" class="card shadow-sm border-0 p-4 mb-4">
+                <h3 class="fw-bold mb-4 border-bottom pb-2">Desserts</h3>
+                @{ var desserts = Model.Where(d => d.Category.Name == "Desserts").ToList(); }
+                @for (int i = 0; i < desserts.Count; i++)
+                {
+                    var dish = desserts[i];
+                    <div class="d-flex justify-content-between align-items-center py-2">
+                        <div class="pe-3">
+                            <h5 class="fw-semibold mb-1">@dish.Name</h5>
+                            <span class="text-danger fw-bold">$@dish.Price</span>
+                            <p class="text-muted small mb-2">@dish.Description</p>
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                                <input type="hidden" name="dishId" value="@dish.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm px-3">Add to Cart</button>
+                            </form>
+                        </div>
+                        <div>
+                            <img src="~/images/@dish.ImageUrl" alt="@dish.Name" class="rounded object-fit-cover shadow-sm" style="width: 90px; height: 90px;" />
+                        </div>
+                    </div>
+                    @if (i < desserts.Count - 1) { <hr class="text-muted opacity-25 my-3" /> }
+                }
+            </section>
 
-		<section id="drinks">
-			@foreach (var dish in Model.Where(d => d.Category.Name == "Drinks"))
-			{
-				<div class="dish-card">
-					<div class="dish-info">
-						<h3 class="dish-name">@dish.Name</h3>
-						<span class="dish-price">$@dish.Price</span>
-						<p class="dish-description">@dish.Description</p>
-					</div>
-					<div class="dish-image">
-						<img src="~/images/@dish.ImageUrl" alt="@dish.Name" />
-					</div>
-				</div>
-			}
-		</section>
+            <!-- 8. DRINKS -->
+            <section id="drinks" class="card shadow-sm border-0 p-4 mb-4">
+                <h3 class="fw-bold mb-4 border-bottom pb-2">Drinks</h3>
+                @{ var drinks = Model.Where(d => d.Category.Name == "Drinks").ToList(); }
+                @for (int i = 0; i < drinks.Count; i++)
+                {
+                    var dish = drinks[i];
+                    <div class="d-flex justify-content-between align-items-center py-2">
+                        <div class="pe-3">
+                            <h5 class="fw-semibold mb-1">@dish.Name</h5>
+                            <span class="text-danger fw-bold">$@dish.Price</span>
+                            <p class="text-muted small mb-2">@dish.Description</p>
+                            <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                                <input type="hidden" name="dishId" value="@dish.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm px-3">Add to Cart</button>
+                            </form>
+                        </div>
+                        <div>
+                            <img src="~/images/@dish.ImageUrl" alt="@dish.Name" class="rounded object-fit-cover shadow-sm" style="width: 90px; height: 90px;" />
+                        </div>
+                    </div>
+                    @if (i < drinks.Count - 1) { <hr class="text-muted opacity-25 my-3" /> }
+                }
+            </section>
 
-	</main>
+        </div>
 
+    </div>
 </div>
