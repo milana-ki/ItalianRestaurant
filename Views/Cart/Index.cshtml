@@ -1,6 +1,37 @@
-﻿namespace ItalianRestaurant.Views.Cart
-{
-    public class Index
-    {
-    }
+﻿@model IEnumerable<ItalianRestaurant.Models.Dish>
+
+@{
+    ViewData["Title"] = "Your Cart";
+    decimal totalSum = Model != null ? Model.Sum(d => d.Price) : 0;
 }
+
+<div class="container my-5" style="max-width: 700px;">
+    <div class="card shadow-sm border-0 p-4">
+        <h2 class="fw-bold mb-4">Your Shopping Cart</h2>
+
+        @if (Model == null || !Model.Any())
+        {
+            <p class="text-muted">Your cart is currently empty.</p>
+        }
+        else
+        {
+            @foreach (var dish in Model)
+            {
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <div>
+                        <h5 class="fw-semibold mb-1">@dish.Name</h5>
+                        <span class="text-danger fw-bold">$@dish.Price</span>
+                    </div>
+                    <div>
+                        <img src="~/images/@dish.ImageUrl" alt="@dish.Name" class="rounded object-fit-cover shadow-sm" style="width: 60px; height: 60px;" />
+                    </div>
+                </div>
+            }
+
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <h4 class="fw-bold">Total: $@totalSum</h4>
+                <a href="#" class="btn btn-danger px-4 py-2">Proceed to Checkout</a>
+            </div>
+        }
+    </div>
+</div>
