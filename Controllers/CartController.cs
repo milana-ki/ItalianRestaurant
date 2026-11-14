@@ -53,5 +53,73 @@ namespace ItalianRestaurant.Controllers
 
             return RedirectToAction("Menu", "Home");
         }
+
+
+
+        [HttpGet]
+        public IActionResult Checkout()
+        {
+            var cartIds = HttpContext.Session.Get<List<int>>("Cart") ?? new List<int>();
+            if (!cartIds.Any())
+            {
+                return RedirectToAction("Index");
+            }
+
+            var cartDishes = _context.Dishes.Where(d => cartIds.Contains(d.Id)).ToList();
+            return View(cartDishes);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Checkout(
+            string customerName,
+            string deliveryAddress,
+            string phone,
+            string paymentMethod,
+            string deliveryTime,
+            string? comment)
+        {
+            var cartIds = HttpContext.Session.Get<List<int>>("Cart") ?? new List<int>();
+            if (!cartIds.Any())
+            {
+                return RedirectToAction("Index");
+            }
+
+            var cartDishes = _context.Dishes.Where(d => cartIds.Contains(d.Id)).ToList();
+
+            var order = new Order
+            {
+                OrderDate = DateTime.Now,
+                CustomerName = customerName,
+                DeliveryAddress = deliveryAddress,
+                Phone = phone,
+                PaymentMethod = paymentMethod,
+                DeliveryTime = deliveryTime,
+                Comment = comment,
+                Status = "New",
+                TotalAmount = cartDishes.Sum(d => d.Price)
+            };
+
+            foreach (var dish in cartDishes)
+            {
+                order.OrderItems.Add(new OrderItem
+                {
+                    DishId = dish.Id,
+                    PriceAtMoment = dish.Price,
+                    Quantity = 1
+                });
+            }
+
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+
+            HttpContext.Session.Remove("Cart");
+
+            return RedirectToAction("Success", new { id = order.Id });
+        }
+
+        public IActionResult Success()
+        {
+            return View();
+        }
     }
 }

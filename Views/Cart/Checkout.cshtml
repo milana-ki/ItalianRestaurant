@@ -1,6 +1,92 @@
-﻿namespace ItalianRestaurant.Views.Cart
-{
-    public class Checkout
-    {
-    }
+﻿@model List<ItalianRestaurant.Models.Dish>
+
+@{
+    ViewData["Title"] = "Checkout";
+    decimal total = Model.Sum(d => d.Price);
 }
+
+<div class="container my-5">
+    <h2 class="fw-bold mb-4">Order Checkout</h2>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 p-4">
+                <form asp-controller="Cart" asp-action="Checkout" method="post">
+                    <h5 class="fw-bold mb-3">1. Contact & Delivery</h5>
+                    
+                    <div class="mb-3">
+                        <label for="CustomerName" class="form-label fw-semibold">Full Name</label>
+                        <input type="text" class="form-control" id="CustomerName" name="customerName" required placeholder="Enter your name" />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="Phone" class="form-label fw-semibold">Phone Number</label>
+                            <input type="tel" class="form-control" id="Phone" name="phone" required placeholder="+380..." />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="DeliveryTime" class="form-label fw-semibold">Delivery Time</label>
+                            <select class="form-select" id="DeliveryTime" name="deliveryTime">
+                                <option value="As soon as possible" selected>As soon as possible (~45 min)</option>
+                                <option value="In 1 hour">In 1 hour</option>
+                                <option value="In 2 hours">In 2 hours</option>
+                                <option value="Specific time (see comment)">Specific time (write in comment)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="DeliveryAddress" class="form-label fw-semibold">Delivery Address</label>
+                        <input type="text" class="form-control" id="DeliveryAddress" name="deliveryAddress" required placeholder="Street, building, entrance, apartment" />
+                    </div>
+
+                    <h5 class="fw-bold mb-3">2. Payment Method</h5>
+                    <div class="mb-4">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="payCash" value="Cash on delivery" checked>
+                            <label class="form-check-label" for="payCash">
+                                Cash on delivery
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="payCard" value="Card to courier">
+                            <label class="form-check-label" for="payCard">
+                                Card to courier (POS terminal)
+                            </label>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold mb-3">3. Additional Notes</h5>
+                    <div class="mb-4">
+                        <label for="Comment" class="form-label fw-semibold">Comment for restaurant or courier (optional)</label>
+                        <textarea class="form-control" id="Comment" name="comment" rows="3" placeholder="Door code, exact delivery time, extra cutlery..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-danger w-100 py-2 fw-bold fs-5">Confirm Order • $@total.ToString("0.00")</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 p-4 bg-light">
+                <h5 class="fw-bold mb-3">Your Order</h5>
+                <ul class="list-group list-group-flush mb-3">
+                    @foreach (var dish in Model)
+                    {
+                        <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <span class="fw-semibold">@dish.Name</span>
+                                <small class="text-muted d-block">1 × $@dish.Price.ToString("0.00")</small>
+                            </div>
+                            <span class="fw-bold">$@dish.Price.ToString("0.00")</span>
+                        </li>
+                    }
+                </ul>
+                <hr />
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fs-5 fw-bold">Total:</span>
+                    <span class="fs-4 fw-bold text-danger">$@total.ToString("0.00")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

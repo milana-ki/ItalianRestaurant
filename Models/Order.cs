@@ -17,7 +17,11 @@ namespace ItalianRestaurant.Models
 
         [Required]
         [StringLength(50)]
-        public string Status { get; set; } = "New"; 
+        public string Status { get; set; } = "New";
+
+        [Required]
+        [StringLength(100)]
+        public string CustomerName { get; set; } = string.Empty;
 
         [Required]
         [StringLength(250)]
@@ -27,7 +31,18 @@ namespace ItalianRestaurant.Models
         [StringLength(20)]
         public string Phone { get; set; } = string.Empty;
 
-        public int UserId { get; set; }
+        [Required]
+        [StringLength(50)]
+        public string PaymentMethod { get; set; } = "Cash";
+
+        [Required]
+        [StringLength(100)]
+        public string DeliveryTime { get; set; } = "As soon as possible";
+
+        [StringLength(500)]
+        public string? Comment { get; set; }
+
+        public int? UserId { get; set; } 
         public User? User { get; set; }
 
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
