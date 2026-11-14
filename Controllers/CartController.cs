@@ -88,7 +88,7 @@ namespace ItalianRestaurant.Controllers
 
             var order = new Order
             {
-                OrderDate = DateTime.Now,
+                OrderDate = DateTime.UtcNow,
                 CustomerName = customerName,
                 DeliveryAddress = deliveryAddress,
                 Phone = phone,
@@ -117,8 +117,9 @@ namespace ItalianRestaurant.Controllers
             return RedirectToAction("Success", new { id = order.Id });
         }
 
-        public IActionResult Success()
+        public IActionResult Success(int id)
         {
+            ViewBag.OrderId = id;
             return View();
         }
     }
