@@ -109,17 +109,24 @@
                 </div>
 
                 <div class="modal-body">
+                    @if (TempData["AuthError"] != null)
+                    {
+                        <div class="alert alert-danger py-2 small mb-3" role="alert">
+                            @TempData["AuthError"]
+                        </div>
+                    }
+
                     <ul class="nav nav-pills nav-fill mb-3" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#pills-login" type="button" role="tab">Log In</button>
+                            <button class="nav-link @(TempData["ActiveTab"]?.ToString() == "register" ? "" : "active")" id="login-tab-btn" data-bs-toggle="pill" data-bs-target="#pills-login" type="button" role="tab">Log In</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#pills-register" type="button" role="tab">Register</button>
+                            <button class="nav-link @(TempData["ActiveTab"]?.ToString() == "register" ? "active" : "")" id="register-tab-btn" data-bs-toggle="pill" data-bs-target="#pills-register" type="button" role="tab">Register</button>
                         </li>
                     </ul>
 
                     <div class="tab-content">
-                        <div class="tab-pane fade show active" id="pills-login" role="tabpanel">
+                        <div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "register" ? "" : "show active")" id="pills-login" role="tabpanel">
                             <form asp-controller="Account" asp-action="Login" method="post">
                                 <div class="mb-3">
                                     <label class="form-label">Email address</label>
@@ -133,7 +140,7 @@
                             </form>
                         </div>
 
-                        <div class="tab-pane fade" id="pills-register" role="tabpanel">
+                        <div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "register" ? "show active" : "")" id="pills-register" role="tabpanel">
                             <form asp-controller="Account" asp-action="Register" method="post">
                                 <div class="mb-3">
                                     <label class="form-label">Full Name</label>
@@ -160,6 +167,16 @@
             </div>
         </div>
     </div>
+
+    @if (TempData["AuthError"] != null)
+    {
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var authModal = new bootstrap.Modal(document.getElementById('authModal'));
+                authModal.show();
+            });
+        </script>
+    }
 
 </body>
 </html>

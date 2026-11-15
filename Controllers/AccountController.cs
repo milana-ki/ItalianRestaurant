@@ -5,7 +5,6 @@ using ItalianRestaurant.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
-using BCrypt.Net; 
 
 namespace ItalianRestaurant.Controllers
 {
@@ -18,32 +17,95 @@ namespace ItalianRestaurant.Controllers
             _context = context;
         }
 
-        public IActionResult Profile()
+        public async Task<IActionResult> Profile()
         {
-            if (!User.Identity.IsAuthenticated)
+            if (User.Identity == null || !User.Identity.IsAuthenticated)
             {
-                return RedirectToAction("Login");
+                TempData["AuthError"] = "Please log in to view your profile.";
+                return RedirectToAction("Index", "Home");
             }
 
             var email = User.FindFirstValue(ClaimTypes.Email);
-            var user = _context.Users.FirstOrDefault(u => u.Email == email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user == null)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Index", "Home");
+            }
 
             return View(user);
         }
 
-        [HttpGet]
-        public IActionResult Register()
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(string FullName, string Email, string Phone)
         {
-            return View();
+            if (User.Identity == null || !User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var currentEmail = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == currentEmail);
+
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (Email != currentEmail && await _context.Users.AnyAsync(u => u.Email == Email))
+            {
+                TempData["ProfileError"] = "This email is already taken by another account.";
+                return RedirectToAction("Profile");
+            }
+
+            user.FullName = FullName;
+            user.Email = Email;
+            user.Phone = Phone;
+
+            await _context.SaveChangesAsync();
+
+            await SignInUser(user);
+
+            TempData["ProfileSuccess"] = "Profile updated successfully!";
+            return RedirectToAction("Profile");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            if (User.Identity == null || !User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user != null)
+            {
+                var userOrders = await _context.Orders.Where(o => o.UserId == user.Id).ToListAsync();
+                foreach (var order in userOrders)
+                {
+                    order.UserId = null;
+                }
+
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+            }
+
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpPost]
         public async Task<IActionResult> Register(string fullName, string email, string password, string phone)
         {
-            if (_context.Users.Any(u => u.Email == email))
+            if (await _context.Users.AnyAsync(u => u.Email == email))
             {
-                ModelState.AddModelError("", "User with this email already exists.");
-                return View();
+                TempData["AuthError"] = "User with this email already exists.";
+                TempData["ActiveTab"] = "register"; 
+                return RedirectToRefererOrHome();
             }
 
             var user = new User
@@ -51,7 +113,7 @@ namespace ItalianRestaurant.Controllers
                 FullName = fullName,
                 Email = email,
                 Phone = phone,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(password), 
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
                 Role = "Client"
             };
 
@@ -63,21 +125,16 @@ namespace ItalianRestaurant.Controllers
             return RedirectToAction("Profile");
         }
 
-        [HttpGet]
-        public IActionResult Login()
-        {
-            return View();
-        }
-
         [HttpPost]
         public async Task<IActionResult> Login(string email, string password)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email == email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
-                ModelState.AddModelError("", "Invalid email or password.");
-                return View();
+                TempData["AuthError"] = "Invalid email or password.";
+                TempData["ActiveTab"] = "login"; 
+                return RedirectToRefererOrHome();
             }
 
             await SignInUser(user);
@@ -90,10 +147,35 @@ namespace ItalianRestaurant.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> MyOrders()
+        {
+            if (User.Identity == null || !User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var orders = await _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Dish)
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            return View(orders);
+        }
+
         private async Task SignInUser(User user)
         {
             var claims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.FullName),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role)
@@ -101,6 +183,16 @@ namespace ItalianRestaurant.Controllers
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+        }
+
+        private IActionResult RedirectToRefererOrHome()
+        {
+            var referer = Request.Headers["Referer"].ToString();
+            if (!string.IsNullOrEmpty(referer))
+            {
+                return Redirect(referer);
+            }
+            return RedirectToAction("Index", "Home");
         }
     }
 }

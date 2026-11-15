@@ -1,0 +1,83 @@
+﻿@model List<ItalianRestaurant.Models.Order>
+
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<div class="container my-5">
+    <h2 class="fw-bold mb-4">My Orders</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="card shadow-sm border-0 p-5 text-center bg-light">
+            <h5 class="text-muted mb-3">You haven't placed any orders yet.</h5>
+            <div>
+                <a asp-controller="Menu" asp-action="Index" class="btn btn-danger px-4">Explore Menu</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var order in Model)
+            {
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <div>
+                                <span class="fw-bold fs-5 me-2">Order #@order.Id</span>
+                                <small class="text-muted">@order.OrderDate.ToLocalTime().ToString("dd MMM yyyy, HH:mm")</small>
+                            </div>
+                            <div>
+                                @{
+                                    var badgeClass = order.Status switch
+                                    {
+                                        "New" => "bg-primary",
+                                        "Cooking" => "bg-warning text-dark",
+                                        "Delivering" => "bg-info text-dark",
+                                        "Completed" => "bg-success",
+                                        "Cancelled" => "bg-secondary",
+                                        _ => "bg-dark"
+                                    };
+                                }
+                                <span class="badge @badgeClass fs-6">@order.Status</span>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-7 mb-3 mb-md-0">
+                                    <h6 class="fw-bold text-muted mb-2">Items:</h6>
+                                    <ul class="list-group list-group-flush">
+                                        @foreach (var item in order.OrderItems)
+                                        {
+                                            <li class="list-group-item px-0 py-1 d-flex justify-content-between border-0">
+                                                <span>@(item.Dish?.Name ?? "Dish") <small class="text-muted">× @item.Quantity</small></span>
+                                                <span class="fw-semibold">$@((item.PriceAtMoment * item.Quantity).ToString("0.00"))</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+
+                                <div class="col-md-5 border-start-md ps-md-4">
+                                    <h6 class="fw-bold text-muted mb-2">Delivery Details:</h6>
+                                    <p class="mb-1 small"><strong>Address:</strong> @order.DeliveryAddress</p>
+                                    <p class="mb-1 small"><strong>Time:</strong> @order.DeliveryTime</p>
+                                    <p class="mb-1 small"><strong>Payment:</strong> @order.PaymentMethod</p>
+                                    @if (!string.IsNullOrWhiteSpace(order.Comment))
+                                    {
+                                        <p class="mb-0 small text-muted"><strong>Note:</strong> @order.Comment</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light py-2 d-flex justify-content-end align-items-center">
+                            <span class="me-2 text-muted">Total Paid:</span>
+                            <span class="fs-5 fw-bold text-danger">$@order.TotalAmount.ToString("0.00")</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
