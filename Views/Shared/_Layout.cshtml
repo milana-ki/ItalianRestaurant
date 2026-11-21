@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -36,9 +37,14 @@
                         </li>
                     </ul>
 
+                    @using System.Security.Claims
+
                     <ul class="navbar-nav">
-                        @if (User.Identity.IsAuthenticated)
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
+                            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+                            var isAdmin = string.Equals(userEmail, "kilbovych.milana@gmail.com", StringComparison.OrdinalIgnoreCase);
+
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-dark d-flex align-items-center gap-1" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle me-1" viewBox="0 0 16 16">
@@ -48,15 +54,18 @@
                                     @User.Identity.Name
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                                    <li><h6 class="dropdown-header">Customer Section</h6></li>
-                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">My Profile</a></li>
-                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="MyOrders">My Orders</a></li>
-
-                                    <li><hr class="dropdown-divider"></li>
-
-                                    <li><h6 class="dropdown-header">Restaurant Admin</h6></li>
-                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Orders">All Orders</a></li>
-                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="ManageMenu">Manage Menu</a></li>
+                                    @if (isAdmin)
+                                    {
+                                        <li><h6 class="dropdown-header">Restaurant Admin</h6></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Orders">All Orders</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="ManageMenu">Manage Menu</a></li>
+                                    }
+                                    else
+                                    {
+                                        <li><h6 class="dropdown-header">Customer Section</h6></li>
+                                        <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">My Profile</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Account" asp-action="MyOrders">My Orders</a></li>
+                                    }
 
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout">Log Out</a></li>
@@ -128,6 +137,7 @@
                     <div class="tab-content">
                         <div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "register" ? "" : "show active")" id="pills-login" role="tabpanel">
                             <form asp-controller="Account" asp-action="Login" method="post">
+                                <input type="hidden" name="returnUrl" id="loginReturnUrl" value="@Context.Request.Query["returnUrl"]" />
                                 <div class="mb-3">
                                     <label class="form-label">Email address</label>
                                     <input type="email" name="email" class="form-control" required />
@@ -142,6 +152,7 @@
 
                         <div class="tab-pane fade @(TempData["ActiveTab"]?.ToString() == "register" ? "show active" : "")" id="pills-register" role="tabpanel">
                             <form asp-controller="Account" asp-action="Register" method="post">
+                                <input type="hidden" name="returnUrl" id="registerReturnUrl" value="@Context.Request.Query["returnUrl"]" />
                                 <div class="mb-3">
                                     <label class="form-label">Full Name</label>
                                     <input type="text" name="fullName" class="form-control" required />
@@ -168,15 +179,53 @@
         </div>
     </div>
 
-    @if (TempData["AuthError"] != null)
+    @{
+        var checkoutReturnUrl = TempData["ReturnUrl"]?.ToString();
+        var hasAuthError = TempData["AuthError"] != null;
+    }
+
+    @if (!string.IsNullOrEmpty(checkoutReturnUrl))
     {
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                var authModal = new bootstrap.Modal(document.getElementById('authModal'));
-                authModal.show();
+            document.addEventListener("DOMContentLoaded", function () {
+                const targetUrl = @Json.Serialize(checkoutReturnUrl);
+                const loginInput = document.getElementById("loginReturnUrl");
+                const registerInput = document.getElementById("registerReturnUrl");
+                if (loginInput) loginInput.value = targetUrl;
+                if (registerInput) registerInput.value = targetUrl;
+
+                const authModalEl = document.getElementById("authModal");
+                if (authModalEl) {
+                    bootstrap.Modal.getOrCreateInstance(authModalEl).show();
+                }
             });
         </script>
     }
+    else if (hasAuthError)
+    {
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const authModalEl = document.getElementById("authModal");
+                if (authModalEl) {
+                    bootstrap.Modal.getOrCreateInstance(authModalEl).show();
+                }
+            });
+        </script>
+    }
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const authModalEl = document.getElementById("authModal");
+            if (!authModalEl) return;
+
+            authModalEl.addEventListener("hidden.bs.modal", function () {
+                const loginInput = document.getElementById("loginReturnUrl");
+                const registerInput = document.getElementById("registerReturnUrl");
+                if (loginInput) loginInput.value = "";
+                if (registerInput) registerInput.value = "";
+            });
+        });
+    </script>
 
 </body>
 </html>

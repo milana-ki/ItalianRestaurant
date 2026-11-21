@@ -99,12 +99,12 @@ namespace ItalianRestaurant.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(string fullName, string email, string password, string phone)
+        public async Task<IActionResult> Register(string fullName, string email, string password, string phone, string? returnUrl = null)
         {
             if (await _context.Users.AnyAsync(u => u.Email == email))
             {
                 TempData["AuthError"] = "User with this email already exists.";
-                TempData["ActiveTab"] = "register"; 
+                TempData["ActiveTab"] = "register";
                 return RedirectToRefererOrHome();
             }
 
@@ -122,35 +122,34 @@ namespace ItalianRestaurant.Controllers
 
             await SignInUser(user);
 
-            var returnUrl = TempData["ReturnUrl"]?.ToString();
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
             }
 
-            return RedirectToAction("Profile");
+            return RedirectToRefererOrHome();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(string email, string password)
+        public async Task<IActionResult> Login(string email, string password, string? returnUrl = null)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
                 TempData["AuthError"] = "Invalid email or password.";
-                TempData["ActiveTab"] = "login"; 
+                TempData["ActiveTab"] = "login";
                 return RedirectToRefererOrHome();
             }
 
-            await SignInUser(user); 
-            var returnUrl = TempData["ReturnUrl"]?.ToString();
+            await SignInUser(user);
+
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
             }
 
-            return RedirectToAction("Profile");
+            return RedirectToRefererOrHome();
         }
 
         public async Task<IActionResult> Logout()
