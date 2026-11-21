@@ -122,6 +122,12 @@ namespace ItalianRestaurant.Controllers
 
             await SignInUser(user);
 
+            var returnUrl = TempData["ReturnUrl"]?.ToString();
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
             return RedirectToAction("Profile");
         }
 
@@ -137,7 +143,13 @@ namespace ItalianRestaurant.Controllers
                 return RedirectToRefererOrHome();
             }
 
-            await SignInUser(user);
+            await SignInUser(user); 
+            var returnUrl = TempData["ReturnUrl"]?.ToString();
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
             return RedirectToAction("Profile");
         }
 
@@ -152,6 +164,8 @@ namespace ItalianRestaurant.Controllers
         {
             if (User.Identity == null || !User.Identity.IsAuthenticated)
             {
+                TempData["ReturnUrl"] = Url.Action("MyOrders", "Account");
+                TempData["AuthError"] = "Please log in to view your orders.";
                 return RedirectToAction("Index", "Home");
             }
 

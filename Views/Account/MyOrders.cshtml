@@ -53,7 +53,7 @@
                                         {
                                             <li class="list-group-item px-0 py-1 d-flex justify-content-between border-0">
                                                 <span>@(item.Dish?.Name ?? "Dish") <small class="text-muted">× @item.Quantity</small></span>
-                                                <span class="fw-semibold">$@((item.PriceAtMoment * item.Quantity).ToString("0.00"))</span>
+                                                <span class="fw-semibold">₴@((item.PriceAtMoment * item.Quantity).ToString("0.00"))</span>
                                             </li>
                                         }
                                     </ul>
@@ -73,7 +73,7 @@
                         </div>
                         <div class="card-footer bg-light py-2 d-flex justify-content-end align-items-center">
                             <span class="me-2 text-muted">Total Paid:</span>
-                            <span class="fs-5 fw-bold text-danger">$@order.TotalAmount.ToString("0.00")</span>
+                            <span class="fs-5 fw-bold text-danger">₴@order.TotalAmount.ToString("0.00")</span>
                         </div>
                     </div>
                 </div>

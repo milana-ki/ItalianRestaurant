@@ -2,6 +2,7 @@
 using ItalianRestaurant.Models;
 using Microsoft.EntityFrameworkCore;
 using ItalianRestaurant.Data;
+using System.Security.Claims;
 
 namespace ItalianRestaurant.Controllers
 {
@@ -14,11 +15,10 @@ namespace ItalianRestaurant.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var cartIds = HttpContext.Session.Get<List<int>>("Cart") ?? new List<int>();
-
-            var cartDishes = _context.Dishes.Where(d => cartIds.Contains(d.Id)).ToList();
+            var cartDishes = await _context.Dishes.Where(d => cartIds.Contains(d.Id)).ToListAsync();
 
             return View(cartDishes);
         }
@@ -51,13 +51,11 @@ namespace ItalianRestaurant.Controllers
                 return Redirect(referer);
             }
 
-            return RedirectToAction("Menu", "Home");
+            return RedirectToAction("Index", "Menu");
         }
 
-
-
         [HttpGet]
-        public IActionResult Checkout()
+        public async Task<IActionResult> Checkout()
         {
             var cartIds = HttpContext.Session.Get<List<int>>("Cart") ?? new List<int>();
             if (!cartIds.Any())
@@ -65,7 +63,21 @@ namespace ItalianRestaurant.Controllers
                 return RedirectToAction("Index");
             }
 
-            var cartDishes = _context.Dishes.Where(d => cartIds.Contains(d.Id)).ToList();
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (int.TryParse(userIdStr, out int userId))
+                {
+                    var user = await _context.Users.FindAsync(userId);
+                    if (user != null)
+                    {
+                        ViewBag.DefaultName = user.FullName;
+                        ViewBag.DefaultPhone = user.Phone;
+                    }
+                }
+            }
+
+            var cartDishes = await _context.Dishes.Where(d => cartIds.Contains(d.Id)).ToListAsync();
             return View(cartDishes);
         }
 
@@ -84,10 +96,21 @@ namespace ItalianRestaurant.Controllers
                 return RedirectToAction("Index");
             }
 
-            var cartDishes = _context.Dishes.Where(d => cartIds.Contains(d.Id)).ToList();
+            int? currentUserId = null;
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (int.TryParse(userIdStr, out int parsedId))
+                {
+                    currentUserId = parsedId;
+                }
+            }
+
+            var cartDishes = await _context.Dishes.Where(d => cartIds.Contains(d.Id)).ToListAsync();
 
             var order = new Order
             {
+                UserId = currentUserId,
                 OrderDate = DateTime.UtcNow,
                 CustomerName = customerName,
                 DeliveryAddress = deliveryAddress,
@@ -98,7 +121,6 @@ namespace ItalianRestaurant.Controllers
                 Status = "New",
                 TotalAmount = cartDishes.Sum(d => d.Price)
             };
-
             foreach (var dish in cartDishes)
             {
                 order.OrderItems.Add(new OrderItem
@@ -115,6 +137,24 @@ namespace ItalianRestaurant.Controllers
             HttpContext.Session.Remove("Cart");
 
             return RedirectToAction("Success", new { id = order.Id });
+        }
+
+        public IActionResult ProceedToCheckout()
+        {
+            var cartIds = HttpContext.Session.Get<List<int>>("Cart") ?? new List<int>();
+            if (!cartIds.Any())
+            {
+                return RedirectToAction("Index");
+            }
+
+            if (User.Identity == null || !User.Identity.IsAuthenticated)
+            {
+                TempData["ReturnUrl"] = Url.Action("Checkout", "Cart");
+                TempData["AuthError"] = "Please sign in or register to continue checkout and save your order history.";
+                return RedirectToAction("Index");
+            }
+
+            return RedirectToAction("Checkout");
         }
 
         public IActionResult Success(int id)
