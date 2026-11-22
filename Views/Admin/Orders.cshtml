@@ -1,6 +1,110 @@
-﻿namespace ItalianRestaurant.Views.Admin
-{
-    public class Orders
-    {
-    }
+﻿@model List<ItalianRestaurant.Models.Order>
+
+@{
+    ViewData["Title"] = "All Orders - Admin";
+    var statuses = new[] { "New", "Cooking", "Delivering", "Completed", "Cancelled" };
 }
+
+<div class="container my-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <h2 class="fw-bold mb-0">All Orders</h2>
+        <span class="badge bg-dark fs-6">Total: @Model.Count</span>
+    </div>
+
+    @if (TempData["AdminSuccess"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["AdminSuccess"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["AdminError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["AdminError"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="card shadow-sm border-0 p-5 text-center bg-light">
+            <h5 class="text-muted mb-0">No orders have been placed yet.</h5>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var order in Model)
+            {
+                var badgeClass = order.Status switch
+                {
+                    "New" => "bg-primary",
+                    "Cooking" => "bg-warning text-dark",
+                    "Delivering" => "bg-info text-dark",
+                    "Completed" => "bg-success",
+                    "Cancelled" => "bg-secondary",
+                    _ => "bg-dark"
+                };
+
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                            <div>
+                                <span class="fw-bold fs-5 me-2">Order #@order.Id</span>
+                                <small class="text-muted me-2">@order.OrderDate.ToLocalTime().ToString("dd MMM yyyy, HH:mm")</small>
+                                <span class="badge @badgeClass fs-6">@order.Status</span>
+                            </div>
+
+                            <form asp-controller="Admin" asp-action="UpdateStatus" method="post" class="d-flex align-items-center gap-2">
+                                <input type="hidden" name="orderId" value="@order.Id" />
+                                <select name="status" class="form-select form-select-sm" style="width: 160px;">
+                                    @foreach (var st in statuses)
+                                    {
+                                        <option value="@st" selected="@(order.Status == st)">@st</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-danger px-3">Update</button>
+                            </form>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <h6 class="fw-bold text-muted mb-2">Customer & Delivery:</h6>
+                                    <p class="mb-1 small"><strong>Customer:</strong> @order.CustomerName (@order.Phone)</p>
+                                    <p class="mb-1 small"><strong>Address:</strong> @order.DeliveryAddress</p>
+                                    <p class="mb-1 small"><strong>Time:</strong> @order.DeliveryTime</p>
+                                    <p class="mb-1 small"><strong>Payment:</strong> @order.PaymentMethod</p>
+                                    @if (!string.IsNullOrWhiteSpace(order.Comment))
+                                    {
+                                        <p class="mb-0 small text-muted"><strong>Note:</strong> @order.Comment</p>
+                                    }
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold text-muted mb-2">Items:</h6>
+                                    <ul class="list-group list-group-flush">
+                                        @foreach (var item in order.OrderItems)
+                                        {
+                                            <li class="list-group-item px-0 py-1 d-flex justify-content-between border-0">
+                                                <span>@(item.Dish?.Name ?? "Dish") <small class="text-muted">× @item.Quantity</small></span>
+                                                <span class="fw-semibold">₴@((item.PriceAtMoment * item.Quantity).ToString("0.00"))</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-light py-2 d-flex justify-content-end align-items-center">
+                            <span class="me-2 text-muted">Total:</span>
+                            <span class="fs-5 fw-bold text-danger">₴@order.TotalAmount.ToString("0.00")</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
